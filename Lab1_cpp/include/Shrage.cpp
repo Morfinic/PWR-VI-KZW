@@ -1,4 +1,5 @@
 #include <iostream>
+#include <utility>
 #include <vector>
 #include "Proces.h"
 
@@ -40,7 +41,7 @@ int findBiggestQidx(const std::vector<Proces>& tab){
 }
 
 int Shrage(std::vector<Proces> tab){
-    std::vector<Proces> schrageNieuszeregowany = tab;
+    std::vector<Proces> schrageNieuszeregowany = std::move(tab);
     std::vector<Proces> schrageGotowe;
     int t{0}, cmax{0};
 
