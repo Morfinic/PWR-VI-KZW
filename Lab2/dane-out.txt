@@ -1,0 +1,33 @@
+Plik: data.10.txt
+Opt: 999999
+
+Plik: data.11.txt
+Opt: 999999
+
+Plik: data.12.txt
+Opt: 999999
+
+Plik: data.13.txt
+Opt: 999999
+
+Plik: data.14.txt
+Opt: 999999
+
+Plik: data.15.txt
+Opt: 999999
+
+Plik: data.16.txt
+Opt: 999999
+
+Plik: data.17.txt
+Opt: 999999
+
+Plik: data.18.txt
+Opt: 999999
+
+Plik: data.19.txt
+Opt: 999999
+
+Plik: data.20.txt
+Opt: 999999
+
