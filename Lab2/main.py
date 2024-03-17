@@ -1,7 +1,7 @@
 from WiTi import *
 
 filePath: str = "./Dane/subDane/data."
-out_f = open("dane-out.txt", 'w')
+out_f = open("dane_out.txt", 'w')
 
 for i in range(10 + 1):
     dane: list[list[int]] = list()
