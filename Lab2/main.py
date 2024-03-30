@@ -7,7 +7,7 @@ def main():
     filePath: str = "./Dane/subDane/data."
 
     with open("dane_out.txt", 'w') as outFile:
-        for i in range(10 + 1):
+        for i in range(0 + 1):
             dane: list[list[int]] = list()
 
             with open(filePath + str(10 + i) + ".txt", 'r') as f:
