@@ -23,13 +23,9 @@ def main():
         )
 
     for process in procList:
-        order, CMAX = process.NEH()
-        print(
-            f"Data: {process.name}\n"
-            f"CMAX otrzymany: {CMAX}\n"
-            f"CMAX opt: {process.NehAnswerCmax}\n"
-            f"{order}"
-        )
+        data = process.QNEH()
+        print(process.name)
+        print(data)
 
 
 if __name__ == "__main__":

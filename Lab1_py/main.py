@@ -8,7 +8,7 @@ from sortRPQ import *
 dataPath: str = "Dane/subDane/data."
 Cmax: int = 0
 
-for i in range(1, 4+1):
+for i in range(1, 1+1):
     rpqTab = list()
 
     with open(dataPath + str(i) + ".txt", 'r') as f:
@@ -22,7 +22,7 @@ for i in range(1, 4+1):
 
         tmp = schrage(rpqTab)
 
-        # print("sort123:", sort123(rpqTab))
+        print("sort123:", sort123(rpqTab))
         # print("sort123_reversed:", sort123_reversed(rpqTab))
         # print("sort123_minP:", sort123_minP(rpqTab))
         # print("sort123_maxQ:", sort123_maxQ(rpqTab))
