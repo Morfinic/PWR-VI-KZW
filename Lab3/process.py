@@ -1,7 +1,6 @@
 import numpy as np
 from timeit import timeit
 
-
 class Process:
     name: str = ""
     numOfTask: int = None
@@ -51,7 +50,6 @@ class Process:
 
         return czasy[zadania_ilosc][maszyny_ilosc]
 
-    @timeit
     def alg123(self):
         return [self._licz_czas(self.taskList), [x + 1 for x in range(self.numOfTask)]]
 
@@ -86,49 +84,52 @@ class Process:
     def goIn(self, harmonogram):
         zadania_ilosc = harmonogram.shape[0]
         maszyny_ilosc = self.numOfMachines
-        czasy = np.zeros((zadania_ilosc, maszyny_ilosc), dtype=int)
+        czasy = harmonogram
+        czasy = np.pad(czasy, 1, mode="constant", constant_values=0)
 
-        for i in range(zadania_ilosc):
-            for j in range(maszyny_ilosc):
-                czasy[i][j] = max(czasy[i][j], czasy[i][j]) + harmonogram[i - 1][j - 1]
-
-        return czasy
+        for i in range(zadania_ilosc + 1):
+            for j in range(maszyny_ilosc + 1):
+                czasy[i][j] = max(
+                    czasy[i][j] + czasy[i - 1][j],
+                    czasy[i][j] + czasy[i][j - 1]
+                )
+        return czasy[1:-1, 1:-1]
 
     def goOut(self, harmonogram):
         zadania_ilosc = harmonogram.shape[0]
         maszyny_ilosc = self.numOfMachines
-        czasy = np.zeros((zadania_ilosc, maszyny_ilosc), dtype=int)
+        czasy = harmonogram
+        czasy = np.pad(czasy, 1, mode="constant", constant_values=0)
 
-        for i in range(1, zadania_ilosc + 1):
-            for j in range(1, maszyny_ilosc + 1):
+        for i in range(0, zadania_ilosc):
+            for j in range(0, maszyny_ilosc):
                 czasy[zadania_ilosc - i][maszyny_ilosc - j] = (
-                        max(
-                            czasy[zadania_ilosc - i][maszyny_ilosc - j],
-                            czasy[zadania_ilosc - i][maszyny_ilosc - j]) +
-                                harmonogram[zadania_ilosc - i][maszyny_ilosc - j]
+                    max(
+                        czasy[zadania_ilosc - i][maszyny_ilosc - j]
+                        + czasy[zadania_ilosc - i][maszyny_ilosc - j + 1],
+                        czasy[zadania_ilosc - i][maszyny_ilosc - j]
+                        + czasy[zadania_ilosc - i + 1][maszyny_ilosc - j]
+                    )
                 )
-
-        return czasy[:zadania_ilosc, :maszyny_ilosc]
+        return czasy[1:-1, 1:-1]
 
     def timeSplit(self, harmonogram, indeks):
         ilosc_maszyn = self.numOfMachines
+        harmonogram = np.vstack((harmonogram, np.zeros((1, ilosc_maszyn), dtype=np.int32)))
+
         harmonogram[indeks][0] = harmonogram[indeks][0] + harmonogram[indeks - 1][0]
 
-        for i in range(ilosc_maszyn):
+        for i in range(1, ilosc_maszyn):
             harmonogram[indeks][i] = max(
                 harmonogram[indeks - 1][i],
                 harmonogram[indeks][i - 1]) + harmonogram[indeks][i]
 
-        c_max = 0
-
         for i in range(ilosc_maszyn):
-            tmp_cmax = harmonogram[indeks][i] + harmonogram[indeks + 1][i]
             harmonogram[indeks][i] = harmonogram[indeks][i] + harmonogram[indeks + 1][i]
-            if tmp_cmax > c_max:
-                c_max = tmp_cmax
 
-        return c_max
+        return max(harmonogram[indeks])
 
+    @timeit
     def QNEH(self):
         ilosc_zadan = self.numOfTask
         ilosc_maszyn = self.numOfMachines
@@ -136,24 +137,35 @@ class Process:
 
         sorted_idx = self._calculateWeight()
         szeregowane_zadan = szeregowane_zadan[sorted_idx]
-        harmonogram = np.empty((0, ilosc_maszyn), dtype=int)
+        harmonogram = np.zeros((1, ilosc_maszyn), dtype=int)
         order = list()
-        indeks = 0
+        tmp_wychodzace = np.zeros((1, self.numOfMachines), dtype=int)
+        tmp_dochodzace = np.zeros((1, self.numOfMachines), dtype=int)
 
         for i in range(ilosc_zadan):
-            tmp_harmonogram = np.vstack((harmonogram, szeregowane_zadan[i]))
-            czas = float('inf')
-            tmp_wychodzace = self.goOut(tmp_harmonogram)
-            tmp_dochodzace = self.goIn(tmp_harmonogram)
+            # tmp_harmonogram = np.vstack((harmonogram, szeregowane_zadan[i]))
+            # tmp_wychodzace = self.goOut(harmonogram)
+            # tmp_dochodzace = self.goIn(harmonogram)
 
-            for j in range(len(harmonogram) + 1):
+            czas = float('inf')
+            indeks = 0
+
+            for j in range(len(harmonogram)+1):
                 tmp_harmonogram = np.vstack((tmp_dochodzace[:j], szeregowane_zadan[i], tmp_wychodzace[j:]))
                 c_max = self.timeSplit(tmp_harmonogram, j)
+
                 if c_max < czas:
                     czas = c_max
                     indeks = j
 
-            harmonogram = np.vstack((harmonogram[:indeks], szeregowane_zadan[i], harmonogram[indeks:]))
+            if i == 0:
+                harmonogram[0] = szeregowane_zadan[i]
+            else:
+                harmonogram = np.vstack((harmonogram[:indeks], szeregowane_zadan[i], harmonogram[indeks:]))
+
+            tmp_wychodzace = self.goOut(harmonogram)
+            tmp_dochodzace = self.goIn(harmonogram)
+
             order.insert(indeks, sorted_idx[i] + 1)
 
         return [self._licz_czas(self.taskList[[x - 1 for x in order]]), order]

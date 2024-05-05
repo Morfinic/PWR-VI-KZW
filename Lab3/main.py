@@ -24,8 +24,7 @@ def main():
 
     for process in procList:
         data = process.QNEH()
-        print(process.name)
-        print(data)
+        # data = process.NEH()
 
 
 if __name__ == "__main__":

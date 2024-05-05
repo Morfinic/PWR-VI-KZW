@@ -1,5 +1,7 @@
 import random
+import numpy as np
 from numpy import exp
+from scipy.special import expit
 
 
 def liczCmax(procList):
@@ -17,9 +19,9 @@ def liczCmax(procList):
 def symulowaneWyrzazanie(tasks, T: int, TEnd: int, epochs: int):
     while T > TEnd:
         for _ in range(epochs):
+            neighbour = 3
             j = random.randint(0, len(tasks) - 1)
-            tmp = 5
-            k = random.choice([x for x in range(j-tmp, j+tmp+1) if x != j and 0 < x < len(tasks)])
+            k = random.choice([x for x in range(j-neighbour, j+neighbour+1) if x != j and 0 < x < len(tasks)])
 
             CMaxPre = liczCmax(tasks)
             tasks[j], tasks[k] = tasks[k], tasks[j]
@@ -28,15 +30,14 @@ def symulowaneWyrzazanie(tasks, T: int, TEnd: int, epochs: int):
             if CMaxPre > CMaxPost:
                 pass
             else:
-                CMaxDiff = abs(CMaxPost / CMaxPre)
+                CMaxDiff = CMaxPost - CMaxPre
                 r = random.random()
-                tmp1 = exp(CMaxDiff * T)
-                if r <= tmp1:
+                if r >= expit(CMaxDiff/T):
                     pass
                 else:
                     tasks[j], tasks[k] = tasks[k], tasks[j]
 
-            T = exp()
+        T -= 1
 
     return liczCmax(tasks)
 
@@ -44,7 +45,7 @@ def symulowaneWyrzazanie(tasks, T: int, TEnd: int, epochs: int):
 if __name__ == '__main__':
     dataPath: str = "./data/data."
 
-    for i in range(1, 1+1):
+    for i in range(1, 4+1):
         rpqTab = list()
 
         with open(dataPath + str(i) + ".txt", 'r') as f:
@@ -53,6 +54,9 @@ if __name__ == '__main__':
             for line in f:
                 rpqTab.append([int(x) for x in line.strip('\n').split(' ')])
 
-            print(symulowaneWyrzazanie(rpqTab, 200, 0, 100))
+            print("Cmax: ", symulowaneWyrzazanie(rpqTab, 200, 0, 100))
 
 # Cmax schrage data1: 13981
+# Cmax schrage data2: 21529
+# Cmax schrage data3: 31683
+# Cmax schrage data4: 34444
