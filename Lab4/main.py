@@ -1,7 +1,7 @@
 import random
-import numpy as np
-from numpy import exp
 from scipy.special import expit
+import matplotlib.pyplot as plt
+import math
 
 
 def liczCmax(procList):
@@ -17,6 +17,8 @@ def liczCmax(procList):
 
 
 def symulowaneWyrzazanie(tasks, T: int, TEnd: int, epochs: int):
+    tmp = list()
+
     while T > TEnd:
         for _ in range(epochs):
             neighbour = 3
@@ -32,14 +34,46 @@ def symulowaneWyrzazanie(tasks, T: int, TEnd: int, epochs: int):
             else:
                 CMaxDiff = CMaxPost - CMaxPre
                 r = random.random()
-                if r >= expit(CMaxDiff/T):
+                if r >= expit(CMaxDiff / T):
                     pass
                 else:
                     tasks[j], tasks[k] = tasks[k], tasks[j]
 
+            tmp.append(liczCmax(tasks))
+
         T -= 1
 
+    plt.plot(tmp)
+    plt.show()
+
+    print("Order:", [entry[-1] for entry in tasks])
+
     return liczCmax(tasks)
+
+
+def tuning(tasks):
+    minVal, maxVal = math.inf, 0
+
+    for _ in range(10 ** 3):
+        neighbour = 3
+        j = random.randint(0, len(tasks) - 1)
+        k = random.choice([x for x in range(j-neighbour, j+neighbour+1) if x != j and 0 < x < len(tasks)])
+
+        CMaxPre = liczCmax(tasks)
+        tasks[j], tasks[k] = tasks[k], tasks[j]
+        CMaxPost = liczCmax(tasks)
+
+        CMaxDiff = abs(CMaxPre - CMaxPost)
+
+        if CMaxDiff > maxVal:
+            maxVal = CMaxDiff
+        elif 1 < CMaxDiff < minVal:
+            minVal = CMaxDiff
+
+    gongaga = int(math.log(maxVal) * math.floor(math.sqrt(maxVal)))
+    gaga = int(gongaga // 2 * math.log(minVal) + minVal)
+
+    return [gongaga, gaga]
 
 
 if __name__ == '__main__':
@@ -53,8 +87,11 @@ if __name__ == '__main__':
 
             for line in f:
                 rpqTab.append([int(x) for x in line.strip('\n').split(' ')])
+            rpqTab = [entry + [idx+1] for idx, entry in enumerate(rpqTab)]
 
-            print("Cmax: ", symulowaneWyrzazanie(rpqTab, 200, 0, 100))
+            T, epochs = tuning(rpqTab)
+            print(f"T: {T}, epochs: {epochs}")
+            print("Cmax: ", symulowaneWyrzazanie(rpqTab, T, 0, epochs))
 
 # Cmax schrage data1: 13981
 # Cmax schrage data2: 21529
